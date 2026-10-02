@@ -1,25 +1,23 @@
 import React, { useState, useEffect, useRef, useCallback, Fragment } from 'react'
 import ForceGraph2D from 'react-force-graph-2d'
-import { Network, Search, GitGraph, Users, UserPlus, UserMinus, Link as LinkIcon, Unlink, Play } from 'lucide-react'
+import { Network, Search, GitGraph, Users, UserPlus, UserMinus, Link as LinkIcon, Unlink, Play, BarChart2 } from 'lucide-react'
 
 import { Graph } from './dsa/Graph'
 import { bfsShortestPath, dfsTraversal, getMutualFriends, getConnectionSuggestions } from './dsa/algorithms'
 import { loadSampleNetwork } from './dsa/data'
 
-const COLOR_PALETTE = [
-  "#6366F1", "#EC4899", "#14B8A6", "#F59E0B",
-  "#8B5CF6", "#06B6D4", "#F97316", "#10B981",
-  "#EF4444", "#3B82F6", "#84CC16", "#A855F7"
-];
+const colors = ['#ef4444', '#f97316', '#f59e0b', '#84cc16', '#22c55e', '#10b981', '#06b6d4', '#3b82f6', '#6366f1', '#8b5cf6', '#d946ef', '#f43f5e'];
+const stringToColor = (str) => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  return colors[Math.abs(hash) % colors.length];
+};
 
 export default function App() {
   const [graph] = useState(() => new Graph())
   const [graphData, setGraphData] = useState({ nodes: [], links: [] })
   const [users, setUsers] = useState([])
   
-  const userColorMap = useRef(new Map())
-  const colorIndex = useRef(0)
-
   // UI State
   const [activeTab, setActiveTab] = useState('manage')
   const [feedback, setFeedback] = useState(null) // { type: 'success' | 'error', message: '' }
@@ -54,19 +52,10 @@ export default function App() {
 
   const syncGraphState = useCallback(() => {
     const allUsers = graph.getUsers().sort()
-    
-    // Assign stable colors to new users
-    allUsers.forEach(u => {
-      if (!userColorMap.current.has(u)) {
-        userColorMap.current.set(u, COLOR_PALETTE[colorIndex.current % COLOR_PALETTE.length])
-        colorIndex.current++
-      }
-    })
-
     setUsers(allUsers)
     
     // Build react-force-graph data
-    const nodes = allUsers.map(id => ({ id, name: id }))
+    const nodes = allUsers.map(id => ({ id, name: id, color: stringToColor(id) }))
     const links = []
     const seenEdges = new Set()
     
@@ -253,21 +242,45 @@ export default function App() {
               {users.length === 0 ? (
                 <div className="absolute inset-0 flex items-center justify-center text-slate-400">No users in the network yet.</div>
               ) : (
-                <ForceGraph2D
-                  graphData={graphData}
-                  nodeLabel="id"
-                  nodeColor={node => userColorMap.current.get(node.id) || '#6366f1'}
-                  nodeRelSize={6}
-                  linkColor={() => '#cbd5e1'}
-                  linkWidth={2}
-                  width={800} // This will be constrained by parent div
-                  height={450}
-                  cooldownTicks={100}
-                  onNodeDragEnd={node => {
-                    node.fx = node.x;
-                    node.fy = node.y;
-                  }}
-                />
+                <Fragment>
+                  <ForceGraph2D
+                    graphData={graphData}
+                    nodeLabel="id"
+                    linkColor={() => '#cbd5e1'}
+                    linkWidth={2}
+                    width={800}
+                    height={450}
+                    cooldownTicks={100}
+                    nodeCanvasObject={(node, ctx, globalScale) => {
+                      const label = node.name;
+                      const fontSize = 12/globalScale;
+                      ctx.font = `${fontSize}px Sans-Serif`;
+                      
+                      ctx.beginPath();
+                      ctx.arc(node.x, node.y, 6, 0, 2 * Math.PI, false);
+                      ctx.fillStyle = node.color || '#6366f1';
+                      ctx.fill();
+
+                      ctx.textAlign = 'center';
+                      ctx.textBaseline = 'top';
+                      ctx.fillStyle = '#1e293b';
+                      ctx.fillText(label, node.x, node.y + 8);
+                    }}
+                    onNodeDragEnd={node => {
+                      node.fx = node.x;
+                      node.fy = node.y;
+                    }}
+                  />
+                  <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-sm border border-slate-200 text-xs max-h-40 overflow-y-auto min-w-[120px]">
+                    <div className="font-semibold text-slate-700 mb-2 border-b border-slate-200 pb-1">Network Legend</div>
+                    {users.map(u => (
+                      <div key={u} className="flex items-center space-x-2 mb-1.5">
+                        <div className="w-3 h-3 rounded-full" style={{backgroundColor: stringToColor(u)}}></div>
+                        <span className="text-slate-600 font-medium">{u}</span>
+                      </div>
+                    ))}
+                  </div>
+                </Fragment>
               )}
             </div>
           </div>
@@ -305,7 +318,9 @@ export default function App() {
                 { id: 'manage', label: 'Manage' },
                 { id: 'bfs', label: 'BFS (Shortest Path)' },
                 { id: 'dfs', label: 'DFS (Explore)' },
-                { id: 'social', label: 'Social Features' }
+                { id: 'social', label: 'Social Features' },
+                { id: 'comparison', label: '⚖️ Algorithm Comparison' },
+                { id: 'analysis', label: '📊 Algorithm Analysis' }
               ].map(t => (
                 <button 
                   key={t.id}
@@ -487,6 +502,184 @@ export default function App() {
                   </div>
                 </div>
               )}
+
+              {/* COMPARISON TAB */}
+              {activeTab === 'comparison' && (
+                <div className="p-6 space-y-6 animate-in fade-in duration-300">
+                  <div className="border-b pb-4">
+                    <h2 className="text-xl font-bold text-slate-800">Algorithm Comparison</h2>
+                    <p className="text-sm text-slate-500 mt-1">Comparing the two core graph algorithms used in this project.</p>
+                  </div>
+                  
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left border border-slate-200 rounded-lg overflow-hidden">
+                      <thead className="bg-slate-50 text-slate-600">
+                        <tr>
+                          <th className="px-4 py-3 border-b font-semibold">Feature</th>
+                          <th className="px-4 py-3 border-b font-semibold">BFS</th>
+                          <th className="px-4 py-3 border-b font-semibold">DFS</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 bg-white">
+                        <tr><td className="px-4 py-3 font-medium text-slate-700">Traversal</td><td className="px-4 py-3 text-slate-600">Level by level</td><td className="px-4 py-3 text-slate-600">Depth first</td></tr>
+                        <tr><td className="px-4 py-3 font-medium text-slate-700">Data Structure</td><td className="px-4 py-3 text-slate-600">Queue</td><td className="px-4 py-3 text-slate-600">Recursion / Stack</td></tr>
+                        <tr><td className="px-4 py-3 font-medium text-slate-700">Shortest Path</td><td className="px-4 py-3 text-slate-600">Yes, for unweighted graph</td><td className="px-4 py-3 text-slate-600">Not guaranteed</td></tr>
+                        <tr><td className="px-4 py-3 font-medium text-slate-700">Exploration</td><td className="px-4 py-3 text-slate-600">Explores nearby nodes first</td><td className="px-4 py-3 text-slate-600">Explores deeper first</td></tr>
+                        <tr><td className="px-4 py-3 font-medium text-slate-700">Project Usage</td><td className="px-4 py-3 text-slate-600">Shortest connection path</td><td className="px-4 py-3 text-slate-600">Network exploration</td></tr>
+                        <tr><td className="px-4 py-3 font-medium text-slate-700">Time Complexity</td><td className="px-4 py-3 text-slate-600 font-mono text-xs">O(V + E)</td><td className="px-4 py-3 text-slate-600 font-mono text-xs">O(V + E)</td></tr>
+                        <tr><td className="px-4 py-3 font-medium text-slate-700">Space Complexity</td><td className="px-4 py-3 text-slate-600 font-mono text-xs">O(V)</td><td className="px-4 py-3 text-slate-600 font-mono text-xs">O(V)</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="bg-indigo-50 text-indigo-800 p-4 rounded-lg text-sm border border-indigo-200">
+                    <strong>Key Difference:</strong> BFS explores the graph level by level, while DFS explores deeply before backtracking.
+                  </div>
+                </div>
+              )}
+
+              {/* ANALYSIS TAB */}
+              {activeTab === 'analysis' && (
+                <div className="p-6 space-y-8 animate-in fade-in duration-300">
+                  <div className="border-b pb-4">
+                    <h2 className="text-xl font-bold text-slate-800">Algorithm Analysis</h2>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-sm font-semibold text-slate-800 mb-2 border-b pb-2">A. GRAPH ANALYSIS</h3>
+                    <ul className="list-disc pl-5 text-sm text-slate-600 space-y-1 mb-3">
+                      <li>Users are vertices/nodes.</li>
+                      <li>Friendships are edges.</li>
+                      <li>The graph is undirected.</li>
+                      <li>The graph uses an adjacency list.</li>
+                    </ul>
+                    <div className="bg-slate-50 border border-slate-200 p-3 rounded-lg text-sm mb-2">
+                      <span className="font-semibold text-slate-700">Graph Storage Complexity:</span> <strong className="font-mono text-xs">O(V + E)</strong>
+                    </div>
+                    <p className="text-xs text-slate-500 italic">V = number of users/vertices, E = number of friendships/edges</p>
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-semibold text-slate-800 mb-2 border-b pb-2">B. BFS ANALYSIS</h3>
+                    <p className="text-sm text-slate-700 mb-1"><strong>Algorithm:</strong> Breadth First Search</p>
+                    <p className="text-sm text-slate-700 mb-2"><strong>Used in this project for:</strong> Finding the shortest connection path between two users.</p>
+                    <p className="text-sm text-slate-700 mb-1"><strong>Uses:</strong></p>
+                    <ul className="list-disc pl-5 text-sm text-slate-600 space-y-1 mb-3">
+                      <li>Queue</li>
+                      <li>Visited Set</li>
+                      <li>Parent/path tracking</li>
+                    </ul>
+                    <p className="text-sm text-slate-700 mb-1 font-medium">Working step-by-step:</p>
+                    <ol className="list-decimal pl-5 text-sm text-slate-600 space-y-1 mb-3">
+                      <li>Start from the selected user.</li>
+                      <li>Add the user to the queue.</li>
+                      <li>Mark the user as visited.</li>
+                      <li>Remove the front user.</li>
+                      <li>Check its neighbours.</li>
+                      <li>Add unvisited neighbours.</li>
+                      <li>Continue until the target is found or the queue is empty.</li>
+                    </ol>
+                    <div className="flex gap-4">
+                      <div className="bg-indigo-50 border border-indigo-100 p-2 rounded-lg text-sm px-4">
+                        <span className="text-indigo-700">Time: <strong className="font-mono text-xs">O(V + E)</strong></span>
+                      </div>
+                      <div className="bg-indigo-50 border border-indigo-100 p-2 rounded-lg text-sm px-4">
+                        <span className="text-indigo-700">Space: <strong className="font-mono text-xs">O(V)</strong></span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-semibold text-slate-800 mb-2 border-b pb-2">C. DFS ANALYSIS</h3>
+                    <p className="text-sm text-slate-700 mb-1"><strong>Algorithm:</strong> Depth First Search</p>
+                    <p className="text-sm text-slate-700 mb-2"><strong>Used in this project for:</strong> Exploring the network from a starting user.</p>
+                    <p className="text-sm text-slate-700 mb-1"><strong>Uses:</strong></p>
+                    <ul className="list-disc pl-5 text-sm text-slate-600 space-y-1 mb-3">
+                      <li>Recursion / Call Stack</li>
+                      <li>Visited Set</li>
+                    </ul>
+                    <p className="text-sm text-slate-700 mb-1 font-medium">Working step-by-step:</p>
+                    <ol className="list-decimal pl-5 text-sm text-slate-600 space-y-1 mb-3">
+                      <li>Start from the selected user.</li>
+                      <li>Mark the user as visited.</li>
+                      <li>Visit an unvisited neighbour.</li>
+                      <li>Continue deeper.</li>
+                      <li>Backtrack when necessary.</li>
+                      <li>Continue until all reachable users are explored.</li>
+                    </ol>
+                    <div className="flex gap-4">
+                      <div className="bg-blue-50 border border-blue-100 p-2 rounded-lg text-sm px-4">
+                        <span className="text-blue-700">Time: <strong className="font-mono text-xs">O(V + E)</strong></span>
+                      </div>
+                      <div className="bg-blue-50 border border-blue-100 p-2 rounded-lg text-sm px-4">
+                        <span className="text-blue-700">Space: <strong className="font-mono text-xs">O(V)</strong></span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-semibold text-slate-800 mb-3 border-b pb-2">D. COMPLEXITY ANALYSIS</h3>
+                    <div className="overflow-x-auto mb-2">
+                      <table className="w-full text-sm text-left border border-slate-200 rounded-lg overflow-hidden">
+                        <thead className="bg-slate-50 text-slate-600">
+                          <tr>
+                            <th className="px-4 py-2 border-b font-semibold">Component</th>
+                            <th className="px-4 py-2 border-b font-semibold">Time</th>
+                            <th className="px-4 py-2 border-b font-semibold">Space</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 bg-white">
+                          <tr><td className="px-4 py-2 font-medium text-slate-700">Graph Storage</td><td className="px-4 py-2 text-slate-600">—</td><td className="px-4 py-2 text-slate-600 font-mono text-xs">O(V + E)</td></tr>
+                          <tr><td className="px-4 py-2 font-medium text-slate-700">BFS</td><td className="px-4 py-2 text-slate-600 font-mono text-xs">O(V + E)</td><td className="px-4 py-2 text-slate-600 font-mono text-xs">O(V)</td></tr>
+                          <tr><td className="px-4 py-2 font-medium text-slate-700">DFS</td><td className="px-4 py-2 text-slate-600 font-mono text-xs">O(V + E)</td><td className="px-4 py-2 text-slate-600 font-mono text-xs">O(V)</td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <p className="text-xs text-slate-500 italic">V and E represent the input size, so Big-O describes how the algorithm scales as V and E grow.</p>
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-semibold text-slate-800 mb-2 border-b pb-2">E. WHY ADJACENCY LIST?</h3>
+                    <ul className="list-disc pl-5 text-sm text-slate-600 space-y-1">
+                      <li>Stores each user's connected neighbours.</li>
+                      <li>Suitable for a relatively sparse social network.</li>
+                      <li>BFS and DFS can directly access neighbours.</li>
+                      <li>Storage complexity is O(V + E).</li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-semibold text-slate-800 mb-3 border-b pb-2">F. PROJECT USAGE</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl shadow-sm">
+                        <div className="font-bold text-slate-800 text-sm mb-1">GRAPH</div>
+                        <div className="text-sm text-slate-600">Stores users and friendships.</div>
+                      </div>
+                      <div className="bg-indigo-50 border border-indigo-100 p-4 rounded-xl shadow-sm">
+                        <div className="font-bold text-indigo-800 text-sm mb-1">BFS</div>
+                        <div className="text-sm text-indigo-700">Finds shortest connection path.</div>
+                      </div>
+                      <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl shadow-sm">
+                        <div className="font-bold text-blue-800 text-sm mb-1">DFS</div>
+                        <div className="text-sm text-blue-700">Explores the network.</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-semibold text-slate-800 mb-3 border-b pb-2">G. VIVA QUICK REFERENCE</h3>
+                    <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-2 text-sm">
+                      <div className="flex justify-between"><span className="font-medium text-slate-700">Graph</span> <span className="text-slate-600">Vertices + Edges</span></div>
+                      <div className="flex justify-between"><span className="font-medium text-slate-700">BFS</span> <span className="text-slate-600">Queue + Shortest Path</span></div>
+                      <div className="flex justify-between"><span className="font-medium text-slate-700">DFS</span> <span className="text-slate-600">Recursion/Stack + Network Exploration</span></div>
+                      <div className="flex justify-between"><span className="font-medium text-slate-700">Graph Representation</span> <span className="text-slate-600">Adjacency List</span></div>
+                      <div className="flex justify-between"><span className="font-medium text-slate-700">BFS Complexity</span> <span className="text-slate-600 font-mono text-xs">O(V + E)</span></div>
+                      <div className="flex justify-between"><span className="font-medium text-slate-700">DFS Complexity</span> <span className="text-slate-600 font-mono text-xs">O(V + E)</span></div>
+                    </div>
+                  </div>
+                  
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -494,5 +687,3 @@ export default function App() {
     </div>
   )
 }
-
-
