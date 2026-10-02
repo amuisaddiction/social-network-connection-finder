@@ -1,0 +1,6 @@
+# Core Application (Desktop/Tkinter) uses ZERO external dependencies.
+# The following dependencies are strictly for the Web Demo (Streamlit).
+
+streamlit>=1.20.0
+networkx>=2.0
+matplotlib>=3.0.0
