@@ -171,7 +171,7 @@ export default function App() {
     } catch (e) {
       showFeedback('error', e.message)
     }
-
+  }
 
   const handleComparison = () => {
     try {
@@ -268,7 +268,6 @@ export default function App() {
     } catch (e) {
       showFeedback('error', e.message)
     }
-  }
   }
 
   const renderDropdown = (val, setVal, label) => (
