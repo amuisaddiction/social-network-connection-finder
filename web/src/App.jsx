@@ -130,8 +130,12 @@ export default function App() {
   const handleBFS = () => {
     try {
       if (!bfsStart || !bfsEnd) throw new Error("Please select both a Start User and a Target User.")
-      const { path, degrees } = bfsShortestPath(graph, bfsStart, bfsEnd)
-      setBfsResult({ path, degrees })
+      const startTime = performance.now();
+      const { path, degrees } = bfsShortestPath(graph, bfsStart, bfsEnd);
+      const endTime = performance.now();
+      const executionTime = endTime - startTime;
+      
+      setBfsResult({ path, degrees, executionTime })
     } catch (e) {
       showFeedback('error', e.message)
     }
@@ -140,8 +144,12 @@ export default function App() {
   const handleDFS = () => {
     try {
       if (!dfsStart) throw new Error("Please select a Starting User.")
-      const traversal = dfsTraversal(graph, dfsStart)
-      setDfsResult(traversal)
+      const startTime = performance.now();
+      const traversal = dfsTraversal(graph, dfsStart);
+      const endTime = performance.now();
+      const executionTime = endTime - startTime;
+      
+      setDfsResult({ traversal, executionTime })
     } catch (e) {
       showFeedback('error', e.message)
     }
