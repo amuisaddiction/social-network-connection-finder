@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback, Fragment } from 'react'
 import ForceGraph2D from 'react-force-graph-2d'
 import { Network, Search, GitGraph, Users, UserPlus, UserMinus, Link as LinkIcon, Unlink, Play } from 'lucide-react'
 
@@ -117,6 +117,7 @@ export default function App() {
 
   const handleBFS = () => {
     try {
+      if (!bfsStart || !bfsEnd) throw new Error("Please select both a Start User and a Target User.")
       const { path, degrees } = bfsShortestPath(graph, bfsStart, bfsEnd)
       setBfsResult({ path, degrees })
     } catch (e) {
@@ -126,6 +127,7 @@ export default function App() {
 
   const handleDFS = () => {
     try {
+      if (!dfsStart) throw new Error("Please select a Starting User.")
       const traversal = dfsTraversal(graph, dfsStart)
       setDfsResult(traversal)
     } catch (e) {
