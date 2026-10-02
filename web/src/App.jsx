@@ -171,6 +171,104 @@ export default function App() {
     } catch (e) {
       showFeedback('error', e.message)
     }
+
+
+  const handleComparison = () => {
+    try {
+      if (!compStart || !compEnd) throw new Error("Please select both a Start User and a Target User.")
+      
+      const runBFS = (start, end) => {
+        const t0 = performance.now()
+        let visitedCount = 0;
+        let path = null;
+        if (start === end) {
+          return { found: 'Yes', path: [start], pathLength: 0, visited: 1, time: performance.now() - t0 };
+        }
+        const queue = [start];
+        const visited = new Set([start]);
+        const parentMap = new Map();
+        parentMap.set(start, null);
+        
+        while (queue.length > 0) {
+          const current = queue.shift();
+          visitedCount++;
+          
+          if (current === end) {
+            const p = [];
+            let curr = end;
+            while(curr) { p.push(curr); curr = parentMap.get(curr); }
+            p.reverse();
+            path = p;
+            break;
+          }
+          
+          for (const neighbor of graph.adjList.get(current) || []) {
+            if (!visited.has(neighbor)) {
+              visited.add(neighbor);
+              parentMap.set(neighbor, current);
+              queue.push(neighbor);
+            }
+          }
+        }
+        const t1 = performance.now()
+        return { 
+          found: path ? 'Yes' : 'No', 
+          path: path, 
+          pathLength: path ? path.length - 1 : '-', 
+          visited: visitedCount, 
+          time: t1 - t0 
+        }
+      }
+
+      const runDFS = (start, end) => {
+        const t0 = performance.now()
+        let visitedCount = 0;
+        let path = null;
+        
+        const visited = new Set();
+        const parentMap = new Map();
+        parentMap.set(start, null);
+        
+        const dfsRecursive = (user) => {
+          visitedCount++;
+          visited.add(user);
+          if (user === end) {
+            const p = [];
+            let curr = end;
+            while(curr) { p.push(curr); curr = parentMap.get(curr); }
+            p.reverse();
+            path = p;
+            return true;
+          }
+          const neighbors = Array.from(graph.adjList.get(user)).sort();
+          for (const neighbor of neighbors) {
+            if (!visited.has(neighbor)) {
+              parentMap.set(neighbor, user);
+              if (dfsRecursive(neighbor)) return true;
+            }
+          }
+          return false;
+        }
+        dfsRecursive(start);
+        
+        const t1 = performance.now()
+        return { 
+          found: path ? 'Yes' : 'No', 
+          path: path, 
+          pathLength: path ? path.length - 1 : '-', 
+          visited: visitedCount, 
+          time: t1 - t0 
+        }
+      }
+
+      const bfsRes = runBFS(compStart, compEnd);
+      const dfsRes = runDFS(compStart, compEnd);
+      
+      setCompResult({ bfs: bfsRes, dfs: dfsRes, start: compStart, end: compEnd });
+    } catch (e) {
+      showFeedback('error', e.message)
+    }
+  }
   }
 
   const renderDropdown = (val, setVal, label) => (
