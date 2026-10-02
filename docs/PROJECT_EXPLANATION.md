@@ -413,7 +413,240 @@ Imagine you are in a viva:
 
 ---
 
-## PART 21 — QUESTIONS MY TEACHER MAY ASK
+## PART 21 — ALGORITHM COMPARISON
+
+Compare the two main algorithms used in this project:
+
+| Feature | BFS | DFS |
+| --- | --- | --- |
+| Full Name | Breadth-First Search | Depth-First Search |
+| Basic Strategy | Explore level by level | Explore as deep as possible first |
+| Data Structure Used | Queue (FIFO) | Recursion / Call Stack (LIFO) |
+| Exploration Pattern | Wide and shallow | Narrow and deep |
+| Shortest Path | Guaranteed in unweighted graphs | Not guaranteed |
+| Memory Usage | Stores a level of nodes in Queue | Stores a path of nodes in Stack |
+| Implementation in This Project | Finds the shortest connection path | Explores the entire network from a user |
+| Main Purpose in This Project | Calculate minimum degrees of separation | Demonstrate full graph traversal |
+| Suitable Use Cases | Finding closest friends | Exploring all connections in a cluster |
+| Time Complexity | O(V + E) | O(V + E) |
+| Space Complexity | O(V) | O(V) |
+
+**Explanation:**
+- **BFS** uses a queue. It explores nodes level by level, starting from the selected user. It visits direct friends first, then friends of friends. Since our social network is an unweighted graph (all friendships are equal), BFS always finds the minimum number of connections between two users.
+- **DFS** uses recursion (call stack). It goes as deep as possible down one friendship chain before backtracking. It is used here for network exploration but DOES NOT guarantee the shortest path.
+
+**Why BFS is used for shortest path instead of DFS:**
+If we have a network where:
+`Alice → Bob → Charlie → David`
+and
+`Alice → Priya → Rahul → David`
+
+BFS will check Alice's direct friends, then their friends, and mathematically guarantee it finds the shortest route based on the number of edges. DFS might blindly follow one long, winding branch deeply before trying the shorter direct branch, which makes it unsuitable for shortest-path calculations.
+
+---
+
+## PART 22 — ALGORITHM ANALYSIS
+
+When analyzing graph algorithms, we use Big-O notation with two specific variables:
+- **V = Number of vertices** (nodes / users)
+- **E = Number of edges** (connections / friendships)
+
+We use V and E because the performance of graph algorithms depends on both how many users exist and how heavily connected they are.
+
+### BFS Algorithm Analysis
+
+In our project, BFS operates by:
+1. Taking a **Starting Node** and adding it to a **Queue**.
+2. Using a **Visited Set** to mark users so they aren't processed twice.
+3. Shifting users from the Queue and visiting their **neighbors** via the adjacency list.
+4. Using a Parent map to track who discovered whom, eventually **reconstructing the shortest path**.
+
+**Time Complexity: O(V + E)**
+- Each user (vertex) is added and removed from the queue at most once → O(V)
+- Each connection (edge) is examined when looking through the adjacency lists → O(E)
+- Because we use an adjacency list, we only look at actual connections. Therefore, the total time is O(V + E).
+
+**Space Complexity: O(V)**
+The auxiliary space (extra memory) for the Queue, Visited Set, and Parent Map will at most store information for all V users. 
+*(Note: Graph storage itself is O(V + E), but the BFS algorithm's space complexity is O(V)).*
+
+### DFS Algorithm Analysis
+
+In our project, DFS operates by:
+1. Taking a **Starting User**.
+2. Making a **Recursive DFS call**.
+3. Adding the user to a **Visited Set** to handle cycles and prevent infinite loops.
+4. Visiting **neighbors** from the adjacency list.
+5. **Backtracking** when it hits a dead end (a user with no unvisited friends).
+
+**Time Complexity: O(V + E)**
+- Each user is visited exactly once by the recursive function → O(V)
+- The adjacency list of each visited user is scanned → O(E)
+- Total time is O(V + E).
+
+**Space Complexity: O(V)**
+The recursive call stack and the Visited Set will require storage proportional to the number of vertices in the worst-case scenario (a straight line graph).
+
+---
+
+## PART 23 — GRAPH REPRESENTATION ANALYSIS
+
+Why does this project use an **Adjacency List** instead of an Adjacency Matrix?
+
+| Representation | Space Complexity | Neighbour Traversal | Suitable For |
+| --- | --- | --- | --- |
+| Adjacency List | O(V + E) | Efficient for actual connections | Sparse / social networks |
+| Adjacency Matrix | O(V²) | Requires scanning all vertices | Dense / small graphs |
+
+**Explanation:**
+A social network is a "sparse" graph. If there are 100 users, each user might only have 2 or 3 friends. An adjacency list only stores the actual friendships that exist. An adjacency matrix would create a massive 100x100 grid storing thousands of "empty" relationships, wasting huge amounts of memory. Furthermore, an adjacency list allows BFS and DFS to instantly find actual neighbors without scanning the entire network.
+
+---
+
+## PART 24 — WHICH ALGORITHM DOES WHAT IN THIS PROJECT?
+
+| Project Feature | Algorithm / Data Structure Used | Reason |
+| --- | --- | --- |
+| Store users | Graph / Adjacency List | Represents vertices and their connections |
+| Store friendships | Adjacency List | Efficiently stores and accesses edges |
+| Find shortest connection | BFS | Finds minimum number of edges in an unweighted graph |
+| Explore network | DFS | Deep traversal and backtracking |
+| Avoid repeated visits | Visited Set | Prevents infinite loops/cycles |
+| Visualize graph | Graph visualization component | Displays nodes and connections physically |
+
+*(Note: The visualization library simply draws data on the screen; it does NOT perform BFS or DFS. Those algorithms are written manually in our algorithms.js file).*
+
+---
+
+## PART 25 — COMPLEXITY COMPARISON
+
+| Operation / Component | Time Complexity | Space Complexity |
+| --- | --- | --- |
+| Graph using Adjacency List | Depends on operation | O(V + E) |
+| BFS Traversal | O(V + E) | O(V) auxiliary |
+| DFS Traversal | O(V + E) | O(V) auxiliary |
+| Graph Visualization | Depends on rendering/library | Depends on graph size |
+| Graph Storage | — | O(V + E) |
+
+*Graph visualization complexity depends entirely on the rendering and layout process, which is handled by the frontend library and is not part of the core DSA algorithm analysis.*
+
+---
+
+## PART 26 — ALGORITHM ANALYSIS USING THE SAMPLE NETWORK
+
+When you click "Load Sample Network", the graph populates with **10 users (V = 10)** and **12 connections (E = 12)**.
+
+### BFS & DFS Worst-Case Traversal Bound:
+O(V + E)
+= O(10 + 12)
+= O(22)
+
+**Important Note for Viva:** This calculation (O(22)) is an illustrative operation count to help understand the formula based on the current sample size. It is NOT a literal measurement of 22 machine CPU cycles or operations. Big-O notation describes how the algorithm scales as the number of users and connections increases.
+
+---
+
+## PART 27 — UNDERSTANDING BIG-O IN THIS PROJECT
+
+Big-O is used to describe how our algorithms perform as the network grows:
+
+- **O(1):** Constant work.
+- **O(V):** Work grows strictly with the number of users.
+- **O(E):** Work grows strictly with the number of connections.
+- **O(V + E):** Work depends on processing both the users and their connections.
+- **O(V²):** Work grows exponentially, checking every possible pair of users (which our project avoids by using an Adjacency List).
+
+---
+
+## PART 28 — SAME COMPLEXITY, DIFFERENT BEHAVIOUR
+
+Both BFS and DFS share the exact same asymptotic time complexity:
+**Time Complexity: O(V + E)**
+
+However, **same Big-O does not mean the algorithms work in the same way.**
+
+- **BFS** uses a queue to fan out level-by-level. It is mathematically suited for finding the shortest path in an unweighted graph.
+- **DFS** uses a stack/recursion to plunge deep into one branch before backtracking. It is suited for blind exploration.
+
+Their purpose, internal logic, and traversal order are completely different, even though their asymptotic complexity is the same.
+
+---
+
+## PART 29 — ALGORITHM SUMMARY FOR VIVA
+
+| Algorithm | Used For | Data Structure | Time | Space |
+| --- | --- | --- | --- | --- |
+| BFS | Shortest connection path | Queue + Visited Set | O(V + E) | O(V) |
+| DFS | Network exploration | Recursion + Visited Set | O(V + E) | O(V) |
+| Graph | Store network | Adjacency List | — | O(V + E) |
+
+**Quick Viva Statements (Memorize these):**
+- "My project represents the social network as an undirected, unweighted graph."
+- "Users are vertices and friendships are edges."
+- "I use an adjacency list to represent the graph efficiently."
+- "BFS is used to find the shortest connection path."
+- "DFS is used to systematically explore the network."
+- "Both BFS and DFS have an O(V + E) time complexity with an adjacency list."
+- "The visited set prevents repeated traversal and handles cycles safely."
+- "BFS uses a queue while DFS uses recursion in my implementation."
+
+---
+
+## PART 30 — VIVA QUESTIONS ON ALGORITHM COMPARISON & ANALYSIS
+
+**1. Why did you use BFS for the shortest path?**
+Because BFS explores the graph level-by-level. The first time it reaches the target in an unweighted graph, it guarantees the shortest path.
+
+**2. Why not DFS for the shortest path?**
+DFS goes deep down one branch first. It might find a longer, winding path to the target before it checks a shorter, direct path.
+
+**3. What is the time complexity of BFS and DFS?**
+Both have a time complexity of O(V + E).
+
+**4. Why are BFS and DFS both O(V + E)?**
+Because in the worst case, both algorithms visit every vertex once O(V), and examine every edge via the adjacency list O(E).
+
+**5. What does V and E represent?**
+V represents the number of Vertices (Users). E represents the number of Edges (Friendships).
+
+**6. What is the space complexity of BFS and DFS?**
+O(V) for both, due to the auxiliary structures (Queue/Visited Set for BFS, Call Stack/Visited Set for DFS).
+
+**7. Why did you choose an adjacency list?**
+Because social networks are sparse graphs. An adjacency list only stores actual connections, saving huge amounts of memory and making neighbor lookups efficient.
+
+**8. What would happen if you used an adjacency matrix?**
+It would take O(V²) space, wasting memory on millions of empty relationships for users who aren't friends.
+
+**9. What is the difference between BFS and DFS?**
+BFS explores broadly (level-by-level) using a Queue. DFS explores deeply (down a single branch) using recursion.
+
+**10. What data structure does BFS use?**
+A Queue (First-In, First-Out).
+
+**11. What data structure does DFS use?**
+The Call Stack (via Recursion, Last-In, First-Out).
+
+**12. Why do you need a visited set?**
+To prevent infinite loops. If Alice connects to Bob, and Bob connects to Alice, the set stops the algorithm from bouncing between them forever.
+
+**13. What happens if the graph contains a cycle?**
+The visited set detects that the node has already been processed and skips it, breaking the cycle safely.
+
+**14. Is DFS guaranteed to find the shortest path?**
+No, it is only guaranteed to find *a* path if one exists, but rarely the shortest.
+
+**15. Is BFS always suitable for weighted graphs?**
+No, BFS only guarantees the shortest path in unweighted graphs (like our project). For weighted graphs, algorithms like Dijkstra's are needed.
+
+**16. What is Big-O notation?**
+It is a mathematical notation used to describe how the runtime or space requirements of an algorithm grow as the input size grows.
+
+**17. What is the difference between time complexity and space complexity?**
+Time complexity measures how long an algorithm takes to run. Space complexity measures how much extra memory (RAM) it requires to run.
+
+---
+
+## PART 31 — QUESTIONS MY TEACHER MAY ASK
 
 **Q: Why use a Graph for this?**
 A: Because social networks are natural graphs. People are vertices and friendships are edges.
@@ -444,7 +677,7 @@ A: No sir/ma'am. The library only draws circles and lines using physics. The BFS
 
 ---
 
-## PART 22 — ONE-MINUTE PROJECT EXPLANATION
+## PART 32 — ONE-MINUTE PROJECT EXPLANATION
 
 **1-Minute Pitch (Memorize this):**
 "Good morning. My project is a Social Network Connection Finder. It is a web application that models social connections using a manual Graph data structure and an Adjacency List. The core of the project demonstrates graph traversal algorithms without using any external math libraries. I implemented Breadth-First Search using a Queue to instantly calculate the shortest path and degrees of separation between two strangers. I also implemented Depth-First Search using recursion to systematically explore the network. The UI binds these manual DSA concepts to a real-time interactive physics visualization to show how abstract data structures work in the real world."
