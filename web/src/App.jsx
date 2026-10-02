@@ -45,6 +45,11 @@ export default function App() {
   const [suggUser, setSuggUser] = useState('')
   const [suggResult, setSuggResult] = useState(null)
 
+  const [compStart, setCompStart] = useState('')
+  const [compEnd, setCompEnd] = useState('')
+  const [compResult, setCompResult] = useState(null)
+
+
   const showFeedback = (type, message) => {
     setFeedback({ type, message })
     setTimeout(() => setFeedback(null), 3000)
@@ -506,39 +511,104 @@ export default function App() {
               {/* COMPARISON TAB */}
               {activeTab === 'comparison' && (
                 <div className="p-6 space-y-6 animate-in fade-in duration-300">
-                  <div className="border-b pb-4">
-                    <h2 className="text-xl font-bold text-slate-800">Algorithm Comparison</h2>
-                    <p className="text-sm text-slate-500 mt-1">Comparing the two core graph algorithms used in this project.</p>
+                  <div className="mb-6">
+                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">04 / Algorithm Comparison</p>
+                    <h2 className="text-2xl font-bold text-slate-900">BFS vs DFS — Same Query</h2>
                   </div>
                   
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left border border-slate-200 rounded-lg overflow-hidden">
-                      <thead className="bg-slate-50 text-slate-600">
-                        <tr>
-                          <th className="px-4 py-3 border-b font-semibold">Feature</th>
-                          <th className="px-4 py-3 border-b font-semibold">BFS</th>
-                          <th className="px-4 py-3 border-b font-semibold">DFS</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100 bg-white">
-                        <tr><td className="px-4 py-3 font-medium text-slate-700">Traversal</td><td className="px-4 py-3 text-slate-600">Level by level</td><td className="px-4 py-3 text-slate-600">Depth first</td></tr>
-                        <tr><td className="px-4 py-3 font-medium text-slate-700">Data Structure</td><td className="px-4 py-3 text-slate-600">Queue</td><td className="px-4 py-3 text-slate-600">Recursion / Stack</td></tr>
-                        <tr><td className="px-4 py-3 font-medium text-slate-700">Shortest Path</td><td className="px-4 py-3 text-slate-600">Yes, for unweighted graph</td><td className="px-4 py-3 text-slate-600">Not guaranteed</td></tr>
-                        <tr><td className="px-4 py-3 font-medium text-slate-700">Exploration</td><td className="px-4 py-3 text-slate-600">Explores nearby nodes first</td><td className="px-4 py-3 text-slate-600">Explores deeper first</td></tr>
-                        <tr><td className="px-4 py-3 font-medium text-slate-700">Project Usage</td><td className="px-4 py-3 text-slate-600">Shortest connection path</td><td className="px-4 py-3 text-slate-600">Network exploration</td></tr>
-                        <tr><td className="px-4 py-3 font-medium text-slate-700">Time Complexity</td><td className="px-4 py-3 text-slate-600 font-mono text-xs">O(V + E)</td><td className="px-4 py-3 text-slate-600 font-mono text-xs">O(V + E)</td></tr>
-                        <tr><td className="px-4 py-3 font-medium text-slate-700">Space Complexity</td><td className="px-4 py-3 text-slate-600 font-mono text-xs">O(V)</td><td className="px-4 py-3 text-slate-600 font-mono text-xs">O(V)</td></tr>
-                      </tbody>
-                    </table>
+                  {/* Controls */}
+                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-100 flex items-end gap-4 flex-wrap">
+                    <div className="flex-1 min-w-[200px]">
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Start User</label>
+                      <select
+                        className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-1 focus:ring-indigo-500"
+                        value={compStart}
+                        onChange={(e) => setCompStart(e.target.value)}
+                      >
+                        <option value="">Select user...</option>
+                        {users.map(u => (
+                          <option key={u} value={u}>{u}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex-1 min-w-[200px]">
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Target User</label>
+                      <select
+                        className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-1 focus:ring-indigo-500"
+                        value={compEnd}
+                        onChange={(e) => setCompEnd(e.target.value)}
+                      >
+                        <option value="">Select user...</option>
+                        {users.map(u => (
+                          <option key={u} value={u}>{u}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <button
+                      onClick={handleComparison}
+                      className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 shadow-sm font-medium transition-colors"
+                    >
+                      Compare
+                    </button>
                   </div>
-
-                  <div className="bg-indigo-50 text-indigo-800 p-4 rounded-lg text-sm border border-indigo-200">
-                    <strong>Key Difference:</strong> BFS explores the graph level by level, while DFS explores deeply before backtracking.
-                  </div>
+                  
+                  {/* Results Table */}
+                  {compResult && (
+                    <div className="overflow-x-auto mt-6">
+                      <table className="w-full text-sm text-left border-y border-slate-200">
+                        <thead className="bg-slate-50/50 text-slate-900 border-b border-slate-200">
+                          <tr>
+                            <th className="px-4 py-4 font-bold">Metric</th>
+                            <th className="px-4 py-4 font-bold">BFS</th>
+                            <th className="px-4 py-4 font-bold">DFS</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 bg-transparent">
+                          <tr>
+                            <td className="px-4 py-4 font-medium text-slate-600">Found</td>
+                            <td className="px-4 py-4 text-slate-900">{compResult.bfs.found}</td>
+                            <td className="px-4 py-4 text-slate-900">{compResult.dfs.found}</td>
+                          </tr>
+                          <tr>
+                            <td className="px-4 py-4 font-medium text-slate-600">Traversal</td>
+                            <td className="px-4 py-4 text-slate-900">{compResult.bfs.path ? compResult.bfs.path.join(' → ') : '-'}</td>
+                            <td className="px-4 py-4 text-slate-900">{compResult.dfs.path ? compResult.dfs.path.join(' → ') : '-'}</td>
+                          </tr>
+                          <tr>
+                            <td className="px-4 py-4 font-medium text-slate-600">Path</td>
+                            <td className="px-4 py-4 text-slate-900">{compResult.bfs.path ? compResult.bfs.path.join(' → ') : '-'}</td>
+                            <td className="px-4 py-4 text-slate-900">{compResult.dfs.path ? compResult.dfs.path.join(' → ') : '-'}</td>
+                          </tr>
+                          <tr>
+                            <td className="px-4 py-4 font-medium text-slate-600">Path Length</td>
+                            <td className="px-4 py-4 text-slate-900">{compResult.bfs.pathLength}</td>
+                            <td className="px-4 py-4 text-slate-900">{compResult.dfs.pathLength}</td>
+                          </tr>
+                          <tr>
+                            <td className="px-4 py-4 font-medium text-slate-600">Nodes Visited</td>
+                            <td className="px-4 py-4 text-slate-900">{compResult.bfs.visited}</td>
+                            <td className="px-4 py-4 text-slate-900">{compResult.dfs.visited}</td>
+                          </tr>
+                          <tr>
+                            <td className="px-4 py-4 font-medium text-slate-600">Execution Time</td>
+                            <td className="px-4 py-4 text-slate-900">{compResult.bfs.time.toFixed(4)} ms</td>
+                            <td className="px-4 py-4 text-slate-900">{compResult.dfs.time.toFixed(4)} ms</td>
+                          </tr>
+                          <tr>
+                            <td className="px-4 py-4 font-medium text-slate-600">Complexity</td>
+                            <td className="px-4 py-4 text-slate-900">O(V + E), O(V)</td>
+                            <td className="px-4 py-4 text-slate-900">O(V + E), O(V)</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <div className="mt-6 bg-slate-100 rounded-md p-4 text-sm text-slate-600">
+                        For {compResult.start} → {compResult.end}, both algorithms ran on the same graph. BFS guarantees a shortest path in an unweighted graph; DFS does not. Execution time is an experimental measurement and can vary.
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
-
-              {/* ANALYSIS TAB */}
+              
               {activeTab === 'analysis' && (
                 <div className="p-6 space-y-8 animate-in fade-in duration-300">
                   <div className="border-b pb-4">
