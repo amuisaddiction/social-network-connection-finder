@@ -1,6 +1,14 @@
-# Core Application (Desktop/Tkinter) uses ZERO external dependencies.
-# The following dependencies are strictly for the Web Demo (Streamlit).
-
-streamlit>=1.20.0
-networkx>=2.0
-matplotlib>=3.0.0
+# Social Network Connection Finder
+# 
+# This project intentionally uses ZERO external dependencies to clearly
+# demonstrate Data Structures and Algorithms (DSA) principles manually.
+#
+# All functionality (Graph, BFS, DFS, GUI) is built using Python's 
+# standard libraries:
+# - collections (deque)
+# - tkinter (GUI)
+# - json (data persistence)
+# - math (graph visualization layout)
+# 
+# No pip install is required. Simply run:
+# python main.py
