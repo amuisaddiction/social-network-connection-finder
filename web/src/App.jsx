@@ -544,22 +544,43 @@ export default function App() {
                   </button>
 
                   {bfsResult && (
-                    <div className="mt-4 border border-slate-200 rounded-xl p-5 bg-slate-50 shadow-inner">
-                      <h4 className="text-xs uppercase tracking-wider text-slate-500 font-bold mb-3">Result</h4>
+                    <div className="mt-6 border border-slate-200 rounded-xl p-6 bg-white shadow-sm">
+                      <h3 className="text-sm font-bold text-slate-800 mb-4 border-b pb-2">
+                        BFS Result - {bfsResult.path ? 'Target Found' : 'Target Not Found'}
+                      </h3>
+                      
+                      <div className="grid grid-cols-3 gap-4 mb-6">
+                        <div className="border border-slate-200 rounded-lg p-3 bg-slate-50 text-center shadow-sm">
+                          <p className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-1">Nodes Visited</p>
+                          <p className="text-lg font-bold text-slate-800">{bfsResult.path ? bfsResult.path.length : '-'}</p>
+                        </div>
+                        <div className="border border-slate-200 rounded-lg p-3 bg-slate-50 text-center shadow-sm">
+                          <p className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-1">Path Length</p>
+                          <p className="text-lg font-bold text-slate-800">{bfsResult.path ? bfsResult.degrees + ' edge(s)' : '-'}</p>
+                        </div>
+                        <div className="border border-slate-200 rounded-lg p-3 bg-slate-50 text-center shadow-sm">
+                          <p className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-1">Execution Time</p>
+                          <p className="text-lg font-bold text-slate-800">{bfsResult.executionTime ? bfsResult.executionTime.toFixed(4) : '0.0000'} ms</p>
+                        </div>
+                      </div>
+
                       {bfsResult.path ? (
                         <>
+                          <h4 className="text-xs uppercase tracking-wider text-slate-500 font-bold mb-3">Traversal & Path:</h4>
                           <div className="flex items-center flex-wrap gap-2 text-lg font-medium text-slate-800 mb-4">
                             {bfsResult.path.map((u, i) => (
                               <React.Fragment key={u}>
                                 <span className="bg-white px-3 py-1 rounded-md border border-slate-200 shadow-sm">{u}</span>
-                                {i < bfsResult.path.length - 1 && <span className="text-slate-400">to</span>}
+                                {i < bfsResult.path.length - 1 && <span className="text-slate-400">-</span>}
                               </React.Fragment>
                             ))}
                           </div>
-                          <p className="text-sm text-slate-600 font-medium">Degrees of Separation: <span className="text-indigo-600 font-bold text-base">{bfsResult.degrees}</span></p>
+                          <p className="text-sm text-slate-600 bg-slate-50 p-3 rounded-md border border-slate-100">
+                            BFS explored {bfsResult.path.length} node(s). The connection requires {bfsResult.degrees} edge(s).
+                          </p>
                         </>
                       ) : (
-                        <p className="text-red-600 font-medium bg-red-50 p-3 rounded border border-red-100">No path exists between {bfsStart} and {bfsEnd}.</p>
+                        <p className="text-slate-600 text-sm bg-slate-50 p-3 rounded-md border border-slate-100">No connection found between the selected users.</p>
                       )}
                     </div>
                   )}
@@ -578,16 +599,33 @@ export default function App() {
                   </button>
 
                   {dfsResult && (
-                    <div className="mt-4 border border-slate-200 rounded-xl p-5 bg-slate-50 shadow-inner">
-                       <h4 className="text-xs uppercase tracking-wider text-slate-500 font-bold mb-3">Traversal Order</h4>
-                       <div className="flex items-center flex-wrap gap-2 text-sm font-medium text-slate-700">
-                          {dfsResult.map((u, i) => (
-                            <React.Fragment key={u}>
-                              <span className="bg-white px-2 py-1 rounded border border-slate-200 shadow-sm">{u}</span>
-                              {i < dfsResult.length - 1 && <span className="text-slate-400">to</span>}
-                            </React.Fragment>
-                          ))}
-                       </div>
+                    <div className="mt-6 border border-slate-200 rounded-xl p-6 bg-white shadow-sm">
+                      <h3 className="text-sm font-bold text-slate-800 mb-4 border-b pb-2">DFS Result</h3>
+                      
+                      <div className="grid grid-cols-2 gap-4 mb-6">
+                        <div className="border border-slate-200 rounded-lg p-3 bg-slate-50 text-center shadow-sm">
+                          <p className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-1">Nodes Visited</p>
+                          <p className="text-lg font-bold text-slate-800">{dfsResult.traversal.length}</p>
+                        </div>
+                        <div className="border border-slate-200 rounded-lg p-3 bg-slate-50 text-center shadow-sm">
+                          <p className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-1">Execution Time</p>
+                          <p className="text-lg font-bold text-slate-800">{dfsResult.executionTime.toFixed(4)} ms</p>
+                        </div>
+                      </div>
+
+                      <h4 className="text-xs uppercase tracking-wider text-slate-500 font-bold mb-3">Traversal Order:</h4>
+                      <div className="flex items-center flex-wrap gap-2 text-sm font-medium text-slate-700 mb-4">
+                        {dfsResult.traversal.map((u, i) => (
+                          <React.Fragment key={u}>
+                            <span className="bg-slate-100 px-2 py-1 rounded border border-slate-200">{u}</span>
+                            {i < dfsResult.traversal.length - 1 && <span className="text-slate-400">-</span>}
+                          </React.Fragment>
+                        ))}
+                      </div>
+                      
+                      <p className="text-sm text-slate-600 bg-slate-50 p-3 rounded-md border border-slate-100">
+                        DFS explored {dfsResult.traversal.length} node(s) in the network starting from {dfsResult.traversal[0]}.
+                      </p>
                     </div>
                   )}
                 </div>
