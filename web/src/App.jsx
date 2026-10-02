@@ -401,14 +401,18 @@ export default function App() {
                   {dfsResult && (
                     <div className="mt-4 border border-slate-200 rounded-xl p-5 bg-slate-50 shadow-inner">
                        <h4 className="text-xs uppercase tracking-wider text-slate-500 font-bold mb-3">Traversal Order</h4>
-                       <div className="flex items-center flex-wrap gap-2 text-sm font-medium text-slate-700">
-                          {dfsResult.map((u, i) => (
-                            <React.Fragment key={u}>
-                              <span className="bg-white px-2 py-1 rounded border border-slate-200 shadow-sm">{u}</span>
-                              {i < dfsResult.length - 1 && <span className="text-slate-400">→</span>}
-                            </React.Fragment>
-                          ))}
-                       </div>
+                       {dfsResult.length > 0 ? (
+                         <div className="flex items-center flex-wrap gap-2 text-sm font-medium text-slate-700">
+                            {dfsResult.map((u, i) => (
+                              <React.Fragment key={u}>
+                                <span className="bg-white px-2 py-1 rounded border border-slate-200 shadow-sm">{u}</span>
+                                {i < dfsResult.length - 1 && <span className="text-slate-400">→</span>}
+                              </React.Fragment>
+                            ))}
+                         </div>
+                       ) : (
+                         <p className="text-slate-500 font-medium italic">No traversal result available.</p>
+                       )}
                     </div>
                   )}
                 </div>
