@@ -6,11 +6,20 @@ import { Graph } from './dsa/Graph'
 import { bfsShortestPath, dfsTraversal, getMutualFriends, getConnectionSuggestions } from './dsa/algorithms'
 import { loadSampleNetwork } from './dsa/data'
 
+const COLOR_PALETTE = [
+  "#6366F1", "#EC4899", "#14B8A6", "#F59E0B",
+  "#8B5CF6", "#06B6D4", "#F97316", "#10B981",
+  "#EF4444", "#3B82F6", "#84CC16", "#A855F7"
+];
+
 export default function App() {
   const [graph] = useState(() => new Graph())
   const [graphData, setGraphData] = useState({ nodes: [], links: [] })
   const [users, setUsers] = useState([])
   
+  const userColorMap = useRef(new Map())
+  const colorIndex = useRef(0)
+
   // UI State
   const [activeTab, setActiveTab] = useState('manage')
   const [feedback, setFeedback] = useState(null) // { type: 'success' | 'error', message: '' }
@@ -45,6 +54,15 @@ export default function App() {
 
   const syncGraphState = useCallback(() => {
     const allUsers = graph.getUsers().sort()
+    
+    // Assign stable colors to new users
+    allUsers.forEach(u => {
+      if (!userColorMap.current.has(u)) {
+        userColorMap.current.set(u, COLOR_PALETTE[colorIndex.current % COLOR_PALETTE.length])
+        colorIndex.current++
+      }
+    })
+
     setUsers(allUsers)
     
     // Build react-force-graph data
@@ -238,7 +256,7 @@ export default function App() {
                 <ForceGraph2D
                   graphData={graphData}
                   nodeLabel="id"
-                  nodeColor={() => '#6366f1'}
+                  nodeColor={node => userColorMap.current.get(node.id) || '#6366f1'}
                   nodeRelSize={6}
                   linkColor={() => '#cbd5e1'}
                   linkWidth={2}
@@ -401,18 +419,14 @@ export default function App() {
                   {dfsResult && (
                     <div className="mt-4 border border-slate-200 rounded-xl p-5 bg-slate-50 shadow-inner">
                        <h4 className="text-xs uppercase tracking-wider text-slate-500 font-bold mb-3">Traversal Order</h4>
-                       {dfsResult.length > 0 ? (
-                         <div className="flex items-center flex-wrap gap-2 text-sm font-medium text-slate-700">
-                            {dfsResult.map((u, i) => (
-                              <React.Fragment key={u}>
-                                <span className="bg-white px-2 py-1 rounded border border-slate-200 shadow-sm">{u}</span>
-                                {i < dfsResult.length - 1 && <span className="text-slate-400">→</span>}
-                              </React.Fragment>
-                            ))}
-                         </div>
-                       ) : (
-                         <p className="text-slate-500 font-medium italic">No traversal result available.</p>
-                       )}
+                       <div className="flex items-center flex-wrap gap-2 text-sm font-medium text-slate-700">
+                          {dfsResult.map((u, i) => (
+                            <React.Fragment key={u}>
+                              <span className="bg-white px-2 py-1 rounded border border-slate-200 shadow-sm">{u}</span>
+                              {i < dfsResult.length - 1 && <span className="text-slate-400">→</span>}
+                            </React.Fragment>
+                          ))}
+                       </div>
                     </div>
                   )}
                 </div>
@@ -480,3 +494,5 @@ export default function App() {
     </div>
   )
 }
+
+
