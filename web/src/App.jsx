@@ -130,10 +130,22 @@ export default function App() {
   const handleBFS = () => {
     try {
       if (!bfsStart || !bfsEnd) throw new Error("Please select both a Start User and a Target User.")
-      const startTime = performance.now();
-      const { path, degrees } = bfsShortestPath(graph, bfsStart, bfsEnd);
-      const endTime = performance.now();
-      const executionTime = endTime - startTime;
+      let startTime = performance.now();
+      const result = bfsShortestPath(graph, bfsStart, bfsEnd);
+      let endTime = performance.now();
+      let executionTime = endTime - startTime;
+      
+      if (executionTime < 1) {
+          startTime = performance.now();
+          for (let i = 0; i < 1000; i++) {
+              bfsShortestPath(graph, bfsStart, bfsEnd);
+          }
+          endTime = performance.now();
+          executionTime = (endTime - startTime) / 1000;
+      }
+      if (executionTime <= 0) executionTime = 0.0001;
+      
+      const { path, degrees } = result;
       
       setBfsResult({ path, degrees, executionTime })
     } catch (e) {
@@ -144,10 +156,20 @@ export default function App() {
   const handleDFS = () => {
     try {
       if (!dfsStart) throw new Error("Please select a Starting User.")
-      const startTime = performance.now();
+      let startTime = performance.now();
       const traversal = dfsTraversal(graph, dfsStart);
-      const endTime = performance.now();
-      const executionTime = endTime - startTime;
+      let endTime = performance.now();
+      let executionTime = endTime - startTime;
+      
+      if (executionTime < 1) {
+          startTime = performance.now();
+          for (let i = 0; i < 1000; i++) {
+              dfsTraversal(graph, dfsStart);
+          }
+          endTime = performance.now();
+          executionTime = (endTime - startTime) / 1000;
+      }
+      if (executionTime <= 0) executionTime = 0.0001;
       
       setDfsResult({ traversal, executionTime })
     } catch (e) {
@@ -177,12 +199,11 @@ export default function App() {
     try {
       if (!compStart || !compEnd) throw new Error("Please select both a Start User and a Target User.")
       
-      const runBFS = (start, end) => {
-        const t0 = performance.now()
+      const runBFSLogic = (start, end) => {
         let visitedCount = 0;
         let path = null;
         if (start === end) {
-          return { found: 'Yes', path: [start], pathLength: 0, visited: 1, time: performance.now() - t0 };
+          return { found: 'Yes', path: [start], pathLength: 0, visited: 1 };
         }
         const queue = [start];
         const visited = new Set([start]);
@@ -210,18 +231,25 @@ export default function App() {
             }
           }
         }
-        const t1 = performance.now()
-        return { 
-          found: path ? 'Yes' : 'No', 
-          path: path, 
-          pathLength: path ? path.length - 1 : '-', 
-          visited: visitedCount, 
-          time: t1 - t0 
-        }
+        return { found: path ? 'Yes' : 'No', path: path, pathLength: path ? path.length - 1 : '-', visited: visitedCount };
       }
 
-      const runDFS = (start, end) => {
-        const t0 = performance.now()
+      const runBFS = (start, end) => {
+        let t0 = performance.now();
+        let res = runBFSLogic(start, end);
+        let t1 = performance.now();
+        let time = t1 - t0;
+        if (time < 1) {
+            t0 = performance.now();
+            for(let i=0; i<1000; i++) runBFSLogic(start, end);
+            t1 = performance.now();
+            time = (t1 - t0) / 1000;
+        }
+        if (time <= 0) time = 0.0001;
+        return { ...res, time };
+      }
+
+      const runDFSLogic = (start, end) => {
         let visitedCount = 0;
         let path = null;
         
@@ -251,14 +279,22 @@ export default function App() {
         }
         dfsRecursive(start);
         
-        const t1 = performance.now()
-        return { 
-          found: path ? 'Yes' : 'No', 
-          path: path, 
-          pathLength: path ? path.length - 1 : '-', 
-          visited: visitedCount, 
-          time: t1 - t0 
+        return { found: path ? 'Yes' : 'No', path: path, pathLength: path ? path.length - 1 : '-', visited: visitedCount };
+      }
+
+      const runDFS = (start, end) => {
+        let t0 = performance.now();
+        let res = runDFSLogic(start, end);
+        let t1 = performance.now();
+        let time = t1 - t0;
+        if (time < 1) {
+            t0 = performance.now();
+            for(let i=0; i<1000; i++) runDFSLogic(start, end);
+            t1 = performance.now();
+            time = (t1 - t0) / 1000;
         }
+        if (time <= 0) time = 0.0001;
+        return { ...res, time };
       }
 
       const bfsRes = runBFS(compStart, compEnd);
