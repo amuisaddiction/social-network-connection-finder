@@ -296,7 +296,7 @@ export default function App() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-slate-900">Social Network Connection Finder</h1>
-              <p className="text-xs text-slate-500 font-medium tracking-wide">Graph • BFS • DFS</p>
+              <p className="text-xs text-slate-500 font-medium tracking-wide">Graph -> BFS -> DFS</p>
             </div>
           </div>
           <div className="hidden sm:flex space-x-3 text-sm">
@@ -430,8 +430,8 @@ export default function App() {
                 { id: 'bfs', label: 'BFS (Shortest Path)' },
                 { id: 'dfs', label: 'DFS (Explore)' },
                 { id: 'social', label: 'Social Features' },
-                { id: 'comparison', label: '⚖️ Algorithm Comparison' },
-                { id: 'analysis', label: '📊 Algorithm Analysis' }
+                { id: 'comparison', label: '-> Algorithm Comparison' },
+                { id: 'analysis', label: '-> Algorithm Analysis' }
               ].map(t => (
                 <button 
                   key={t.id}
@@ -517,7 +517,7 @@ export default function App() {
                             {bfsResult.path.map((u, i) => (
                               <React.Fragment key={u}>
                                 <span className="bg-white px-3 py-1 rounded-md border border-slate-200 shadow-sm">{u}</span>
-                                {i < bfsResult.path.length - 1 && <span className="text-slate-400">→</span>}
+                                {i < bfsResult.path.length - 1 && <span className="text-slate-400">-></span>}
                               </React.Fragment>
                             ))}
                           </div>
@@ -549,7 +549,7 @@ export default function App() {
                           {dfsResult.map((u, i) => (
                             <React.Fragment key={u}>
                               <span className="bg-white px-2 py-1 rounded border border-slate-200 shadow-sm">{u}</span>
-                              {i < dfsResult.length - 1 && <span className="text-slate-400">→</span>}
+                              {i < dfsResult.length - 1 && <span className="text-slate-400">-></span>}
                             </React.Fragment>
                           ))}
                        </div>
@@ -619,7 +619,7 @@ export default function App() {
                 <div className="p-6 space-y-6 animate-in fade-in duration-300">
                   <div className="mb-6">
                     <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">04 / Algorithm Comparison</p>
-                    <h2 className="text-2xl font-bold text-slate-900">BFS vs DFS — Same Query</h2>
+                    <h2 className="text-2xl font-bold text-slate-900">BFS vs DFS -> Same Query</h2>
                   </div>
                   
                   {/* Controls */}
@@ -677,13 +677,13 @@ export default function App() {
                           </tr>
                           <tr>
                             <td className="px-4 py-4 font-medium text-slate-600">Traversal</td>
-                            <td className="px-4 py-4 text-slate-900">{compResult.bfs.path ? compResult.bfs.path.join(' → ') : '-'}</td>
-                            <td className="px-4 py-4 text-slate-900">{compResult.dfs.path ? compResult.dfs.path.join(' → ') : '-'}</td>
+                            <td className="px-4 py-4 text-slate-900">{compResult.bfs.path ? compResult.bfs.path.join(' -> ') : '-'}</td>
+                            <td className="px-4 py-4 text-slate-900">{compResult.dfs.path ? compResult.dfs.path.join(' -> ') : '-'}</td>
                           </tr>
                           <tr>
                             <td className="px-4 py-4 font-medium text-slate-600">Path</td>
-                            <td className="px-4 py-4 text-slate-900">{compResult.bfs.path ? compResult.bfs.path.join(' → ') : '-'}</td>
-                            <td className="px-4 py-4 text-slate-900">{compResult.dfs.path ? compResult.dfs.path.join(' → ') : '-'}</td>
+                            <td className="px-4 py-4 text-slate-900">{compResult.bfs.path ? compResult.bfs.path.join(' -> ') : '-'}</td>
+                            <td className="px-4 py-4 text-slate-900">{compResult.dfs.path ? compResult.dfs.path.join(' -> ') : '-'}</td>
                           </tr>
                           <tr>
                             <td className="px-4 py-4 font-medium text-slate-600">Path Length</td>
@@ -708,7 +708,7 @@ export default function App() {
                         </tbody>
                       </table>
                       <div className="mt-6 bg-slate-100 rounded-md p-4 text-sm text-slate-600">
-                        For {compResult.start} → {compResult.end}, both algorithms ran on the same graph. BFS guarantees a shortest path in an unweighted graph; DFS does not. Execution time is an experimental measurement and can vary.
+                        For {compResult.start} -> {compResult.end}, both algorithms ran on the same graph. BFS guarantees a shortest path in an unweighted graph; DFS does not. Execution time is an experimental measurement and can vary.
                       </div>
                     </div>
                   )}
@@ -805,7 +805,7 @@ export default function App() {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 bg-white">
-                          <tr><td className="px-4 py-2 font-medium text-slate-700">Graph Storage</td><td className="px-4 py-2 text-slate-600">—</td><td className="px-4 py-2 text-slate-600 font-mono text-xs">O(V + E)</td></tr>
+                          <tr><td className="px-4 py-2 font-medium text-slate-700">Graph Storage</td><td className="px-4 py-2 text-slate-600">-></td><td className="px-4 py-2 text-slate-600 font-mono text-xs">O(V + E)</td></tr>
                           <tr><td className="px-4 py-2 font-medium text-slate-700">BFS</td><td className="px-4 py-2 text-slate-600 font-mono text-xs">O(V + E)</td><td className="px-4 py-2 text-slate-600 font-mono text-xs">O(V)</td></tr>
                           <tr><td className="px-4 py-2 font-medium text-slate-700">DFS</td><td className="px-4 py-2 text-slate-600 font-mono text-xs">O(V + E)</td><td className="px-4 py-2 text-slate-600 font-mono text-xs">O(V)</td></tr>
                         </tbody>
